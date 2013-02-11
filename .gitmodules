@@ -1,0 +1,3 @@
+[submodule "lib/hbci4java"]
+	path = lib/hbci4java
+	url = https://github.com/willuhn/hbci4java.git
