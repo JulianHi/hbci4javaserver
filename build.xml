@@ -44,7 +44,7 @@
                 <attribute name="Main-Class" value="org.kapott.demo.hbci.server.TestServer"/>
             </manifest>
         </jar>
-		<copy file="lib/hbci4java.jar" tofile="${dist}/demo/deploy/WEB-INF/lib/hbci4java.jar"/>
+		<copy file="lib/hbci4java/dist/jar/hbci4java.jar" tofile="${dist}/demo/deploy/WEB-INF/lib/hbci4java.jar"/>
         
         <copy todir="${dist}/demo/deploy">
             <fileset dir="demo/deploy">
