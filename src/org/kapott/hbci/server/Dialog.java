@@ -29,14 +29,18 @@ import java.util.Hashtable;
 import java.util.Properties;
 
 import org.kapott.hbci.exceptions.HBCI_Exception;
+import org.kapott.hbci.manager.HBCIKernel;
+import org.kapott.hbci.manager.HBCIKernelFactory;
+import org.kapott.hbci.manager.HBCIKernelImpl;
 import org.kapott.hbci.manager.HBCIUtils;
+import org.kapott.hbci.manager.IHandlerData;
 import org.kapott.hbci.manager.MsgGen;
 import org.kapott.hbci.passport.HBCIPassportInternal;
 import org.kapott.hbci.protocol.MSG;
 import org.kapott.hbci.protocol.SEG;
 import org.kapott.hbci.protocol.factory.MSGFactory;
 import org.kapott.hbci.security.Crypt;
-import org.kapott.hbci.security.HBCIProvider;
+import org.kapott.cryptalgs.CryptAlgs4JavaProvider;
 import org.kapott.hbci.security.factory.CryptFactory;
 import org.kapott.hbci.server.msg.MsgHandler;
 import org.w3c.dom.Document;
@@ -125,7 +129,8 @@ public class Dialog
                     try {
                         // anonymes passport erzeugen (oder holen)
                         HBCIUtils.log("trying to decrypt encrypted message",HBCIUtils.LOG_DEBUG);
-                        Crypt crypt=CryptFactory.getInstance().createCrypt(cryptedMsg,msggen,getLocalPassport());
+                        //Crypt crypt=CryptFactory.getInstance().createCrypt(cryptedMsg,msggen,getLocalPassport());
+                        Crypt crypt=CryptFactory.getInstance().createCrypt(localPassport.getParentHandlerData(), cryptedMsg);
                         try {
                             decryptedMsgData=new StringBuffer(crypt.decryptIt());
                             HBCIUtils.log("decrypted message: "+decryptedMsgData,HBCIUtils.LOG_DEBUG);
@@ -302,8 +307,8 @@ public class Dialog
                 msggen=new MsgGen(syntaxStream);
                 ServerData.getInstance().storeMsgGen(hbciversion,msggen);
                 
-                if (Security.getProvider("HBCIProvider")==null) {
-                    Security.addProvider(new HBCIProvider());
+                if (Security.getProvider("CryptAlgs4JavaProvider")==null) {
+                    Security.addProvider(new CryptAlgs4JavaProvider());
                 }
             } catch (Exception e) {
                 throw new HBCI_Exception("could not initialize message generator for hbciversion "+hbciversion,e);

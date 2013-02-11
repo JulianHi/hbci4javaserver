@@ -322,7 +322,7 @@ public class JobContext
     public Value extractBTG(String header)
     {
         Value value=new Value(getJobData(header+".value"),getJobData(header+".curr"));
-        return (value.curr!=null)?value:null;
+        return (value.getCurr()!=null)?value:null;
     }
     
     /** Extrahieren von evtl. mehrfach auftretenden Datenelemente. Das Datenelement

@@ -21,11 +21,15 @@
 
 package org.kapott.hbci.server;
 
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 
+import org.kapott.hbci.callback.AbstractHBCICallback;
 import org.kapott.hbci.exceptions.HBCI_Exception;
 import org.kapott.hbci.manager.HBCIUtils;
+import org.kapott.hbci.passport.HBCIPassport;
 import org.kapott.hbci.server.datastore.DataStore;
 import org.kapott.hbci.server.listener.ConnectionListener;
 
@@ -84,7 +88,29 @@ public class HBCIServer
 
                 new Thread(new ThreadGroup("listener-"+name),"listener-"+name) {
                     public void run() {
-                        HBCIUtils.initThread(null,null);
+                    	AbstractHBCICallback callback = new AbstractHBCICallback() {
+							
+							@Override
+							public void status(HBCIPassport passport, int statusTag, Object[] o) {
+								// TODO Auto-generated method stub
+								
+							}
+							
+							@Override
+							public void log(String msg, int level, Date date, StackTraceElement trace) {
+								// TODO Auto-generated method stub
+								
+							}
+							
+							@Override
+							public void callback(HBCIPassport passport, int reason, String msg,
+									int datatype, StringBuffer retData) {
+								// TODO Auto-generated method stub
+								
+							}
+						};
+						
+                        HBCIUtils.initThread(new Properties(), null);
                         HBCIUtils.setParam("log.loglevel.default",
                                 Integer.toString(ServerData.getInstance().getLogLevel()));
                         listener.start();

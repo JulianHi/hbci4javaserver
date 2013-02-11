@@ -313,7 +313,7 @@ public abstract class AbstractMsgHandler
         passports.addPassport(
                 getServerData().getPassport(dialog),
                 HBCIPassport.ROLE_ISS);
-        Sig sig=SigFactory.getInstance().createSig(decryptedMsg,msggen,passports);
+        Sig sig=SigFactory.getInstance().createSig(getDialog().getLocalPassport().getParentHandlerData(),decryptedMsg,passports);
         
         boolean sigOk=sig.verify();
         SigFactory.getInstance().unuseObject(sig);
@@ -407,7 +407,7 @@ public abstract class AbstractMsgHandler
             // this is for multisigs
             HBCIPassportList passports=new HBCIPassportList();
             passports.addPassport(passport,HBCIPassport.ROLE_ISS);
-            Sig sig=SigFactory.getInstance().createSig(msg,dialog.getMsgGen(),passports);
+            Sig sig=SigFactory.getInstance().createSig(dialog.getLocalPassport().getParentHandlerData(),msg,passports);
             
             try {
                 if (!sig.signIt())
@@ -425,7 +425,7 @@ public abstract class AbstractMsgHandler
         // evtl. verschlsseln
         if (dialog.getFlag("encryptResponse")) {
             HBCIUtils.log("encrypting response message",HBCIUtils.LOG_DEBUG);
-            Crypt crypt=CryptFactory.getInstance().createCrypt(msg,dialog.getMsgGen(),passport);
+            Crypt crypt=CryptFactory.getInstance().createCrypt(dialog.getLocalPassport().getParentHandlerData(),msg);
             try {
                 MSG old=msg;
                 msg=crypt.cryptIt("CryptedRes");

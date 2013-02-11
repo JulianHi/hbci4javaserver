@@ -24,6 +24,7 @@ package org.kapott.hbci.server.listener;
 import java.io.UnsupportedEncodingException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Properties;
 
 import org.kapott.hbci.manager.HBCIUtils;
 import org.kapott.hbci.server.DialogMgr;
@@ -49,7 +50,7 @@ public class RMIListenerImpl
                 HBCIUtils.init(null,null,new HBCICallbackInternal());
                 initialized=true;
             } else {
-                HBCIUtils.initThread(null,null);
+                HBCIUtils.initThread(new Properties(),null);
             }
             HBCIUtils.setParam("connection.id","PinTan");
             HBCIUtils.setParam("log.loglevel.default",Integer.toString(ServerData.getInstance().getLogLevel()));
