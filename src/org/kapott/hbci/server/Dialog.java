@@ -130,7 +130,7 @@ public class Dialog
                         // anonymes passport erzeugen (oder holen)
                         HBCIUtils.log("trying to decrypt encrypted message",HBCIUtils.LOG_DEBUG);
                         //Crypt crypt=CryptFactory.getInstance().createCrypt(cryptedMsg,msggen,getLocalPassport());
-                        Crypt crypt=CryptFactory.getInstance().createCrypt(localPassport.getParentHandlerData(), cryptedMsg);
+                        Crypt crypt=CryptFactory.getInstance().createCrypt(getLocalPassport().getParentHandlerData(), cryptedMsg);
                         try {
                             decryptedMsgData=new StringBuffer(crypt.decryptIt());
                             HBCIUtils.log("decrypted message: "+decryptedMsgData,HBCIUtils.LOG_DEBUG);
