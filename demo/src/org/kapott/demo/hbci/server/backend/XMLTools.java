@@ -22,6 +22,7 @@
 package org.kapott.demo.hbci.server.backend;
 
 import java.io.File;
+import java.lang.String;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -194,8 +195,8 @@ public class XMLTools
         Element ret=doc.createElement(name);
         
         if (btg!=null) {
-            ret.appendChild(createElement(doc,"value",Long.toString(Math.round(btg.value*10000))));
-            ret.appendChild(createElement(doc,"curr",btg.curr));
+            ret.appendChild(createElement(doc,"value",Long.toString(Math.round(btg.getDoubleValue()*10000))));
+            ret.appendChild(createElement(doc,"curr",btg.getCurr()));
         }
         
         return ret;
@@ -208,10 +209,10 @@ public class XMLTools
         Element elem_value=getChildElement(elem,name);
         if (elem_value!=null) {
             Value val=new Value();
-            val.value=Double.parseDouble(readElement(elem_value,"value","0"))/10000.0;
-            val.curr=readElement(elem_value,"curr",null);
+            val.setValue(Double.parseDouble(readElement(elem_value,"value","0"))/10000.0);
+            val.setCurr(readElement(elem_value,"curr",null));
 
-            if (val.curr!=null)
+            if (val.getCurr()!=null)
                 ret=val;
         }
         
@@ -266,19 +267,19 @@ public class XMLTools
             ret.appendChild(createDateTimeElement(doc,"valuta",line.valuta));
             ret.appendChild(createAccountElement(doc,"other",line.other));
             
-            Value btg=new Value(line.value.value,line.value.curr);
-            if (line.cd.equals("D"))
-                btg.value=-btg.value;
+            Value btg=new Value(line.value.getDoubleValue(),line.value.getCurr());
+            //if (line.cd.equals("D"))
+            //    btg.value=-btg.value;
             ret.appendChild(createValueElement(doc,"value",btg));
             ret.appendChild(createValueElement(doc,"charge",line.charge_value));
             ret.appendChild(createValueElement(doc,"orig",line.orig_value));
             
-            btg=new Value(line.saldo.value.value,line.saldo.value.curr);
-            if (line.saldo.cd.equals("D"))
-                btg.value=-btg.value;
+            btg=new Value(line.saldo.value.getLongValue(),line.saldo.value.getCurr());
+            //if (line.saldo.cd.equals("D"))
+            //    btg.value=-btg.value;
             ret.appendChild(createValueElement(doc,"saldo",btg));
             
-            ret.appendChild(createStringArrayElement(doc,"usage",line.usage));
+            ret.appendChild(createStringArrayElement(doc,"usage", (String[])line.usage.toArray()));
             ret.appendChild(createElement(doc,"primanota",line.primanota));
             ret.appendChild(createElement(doc,"gvcode",line.gvcode));
             ret.appendChild(createElement(doc,"addkey",line.addkey));

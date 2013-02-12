@@ -404,13 +404,13 @@ public class TestServer
         }
         
         // *** hoehe von btg ueberpruefen
-        if (btg.value<=0) {
+        if (btg.getLongValue()<=0) {
             context.addStatus("BTG.value","9215","Inhalt zu klein",null);
             return;
         }
         
         // waehrung von btg ueberprfen
-        if (!btg.curr.equals("EUR")) {
+        if (!btg.getCurr().equals("EUR")) {
             context.addStatus("BTG.curr","9210","Ungltige Whrung",null);
             return;
         }
@@ -434,13 +434,13 @@ public class TestServer
              eigene konto ja belastet wird), bei lastschriften (inverse=true)
              muss der wert positiv bleiben, weil das eigene konto erhht wird */
             if (!inverse)
-                btg.value=-btg.value;
+                btg.setValue(-btg.getLongValue());
             
             backend.addTransfer(my,other,btg,usage,myKey,null);
             
             // hier alle konten bei dieser bank checken
             if ((other=context.extractOtherAccount("Other")).customerid!=null) {
-                btg.value=-btg.value;
+                btg.setValue(-btg.getLongValue());
                 backend.addTransfer(other,my,btg,usage,key,addkey);
             }
             
