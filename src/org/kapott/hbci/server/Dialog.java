@@ -29,6 +29,7 @@ import java.util.Hashtable;
 import java.util.Properties;
 
 import org.kapott.hbci.exceptions.HBCI_Exception;
+import org.kapott.hbci.manager.HBCIHandler;
 import org.kapott.hbci.manager.HBCIKernel;
 import org.kapott.hbci.manager.HBCIKernelFactory;
 import org.kapott.hbci.manager.HBCIKernelImpl;
@@ -130,7 +131,9 @@ public class Dialog
                         // anonymes passport erzeugen (oder holen)
                         HBCIUtils.log("trying to decrypt encrypted message",HBCIUtils.LOG_DEBUG);
                         //Crypt crypt=CryptFactory.getInstance().createCrypt(cryptedMsg,msggen,getLocalPassport());
-                        Crypt crypt=CryptFactory.getInstance().createCrypt(getLocalPassport().getParentHandlerData(), cryptedMsg);
+                        getLocalPassport().setFilterType("Base64");
+                        IHandlerData handlerData = new HBCIHandler(this.hbciversion, getLocalPassport());
+                        Crypt crypt=CryptFactory.getInstance().createCrypt(handlerData, cryptedMsg);
                         try {
                             decryptedMsgData=new StringBuffer(crypt.decryptIt());
                             HBCIUtils.log("decrypted message: "+decryptedMsgData,HBCIUtils.LOG_DEBUG);
@@ -413,13 +416,26 @@ public class Dialog
     public HBCIPassportInternal getLocalPassport()
     {
         if (localPassport==null) {
-            try {
-                Class       cl=Class.forName("org.kapott.hbci.server.passport.LocalPassport"+getPassportType());
-                Constructor cons=cl.getConstructor(null);
-                localPassport=(HBCIPassportInternal)cons.newInstance(null);
-            } catch (Exception e) {
-                throw new HBCI_Exception(e);
-            }
+        	HBCIUtils.log("Creating local passport in dialog userid:"+this.getUserId(),HBCIUtils.LOG_INFO);
+        	
+        	if ( this.userid == null ) { 
+                try {
+                    Class       cl=Class.forName("org.kapott.hbci.server.passport.LocalPassport"+getPassportType());
+                    Constructor cons=cl.getConstructor(null);
+                    localPassport=(HBCIPassportInternal)cons.newInstance(null);
+                } catch (Exception e) {
+                    throw new HBCI_Exception(e);
+                }
+        	}
+        	else {
+                try {
+                    Class       cl=Class.forName("org.kapott.hbci.server.passport.LocalPassport"+getPassportType());
+                    Constructor cons=cl.getDeclaredConstructor(org.kapott.hbci.server.Dialog.class);
+                    localPassport=(HBCIPassportInternal)cons.newInstance(this);
+                } catch (Exception e) {
+                    throw new HBCI_Exception(e);
+                }
+        	}
         }
         
         return localPassport;
