@@ -34,8 +34,10 @@ import org.kapott.hbci.manager.HBCIKernel;
 import org.kapott.hbci.manager.HBCIKernelFactory;
 import org.kapott.hbci.manager.HBCIKernelImpl;
 import org.kapott.hbci.manager.HBCIUtils;
+import org.kapott.hbci.manager.HBCIUtilsInternal;
 import org.kapott.hbci.manager.IHandlerData;
 import org.kapott.hbci.manager.MsgGen;
+import org.kapott.hbci.passport.HBCIPassport;
 import org.kapott.hbci.passport.HBCIPassportInternal;
 import org.kapott.hbci.protocol.MSG;
 import org.kapott.hbci.protocol.SEG;
@@ -131,8 +133,18 @@ public class Dialog
                         // anonymes passport erzeugen (oder holen)
                         HBCIUtils.log("trying to decrypt encrypted message",HBCIUtils.LOG_DEBUG);
                         //Crypt crypt=CryptFactory.getInstance().createCrypt(cryptedMsg,msggen,getLocalPassport());
-                        getLocalPassport().setFilterType("Base64");
-                        IHandlerData handlerData = new HBCIHandler(this.hbciversion, getLocalPassport());
+                        
+                        setUserId((String) cryptValues.get("Crypted.CryptHead.KeyName.userid"));
+                        setCustomerId(getUserId());
+                        
+                        HBCIPassport passport = getLocalPassport();
+                        passport.setFilterType("Base64");
+                        passport.setUserId(getUserId());
+                        passport.setCustomerId(getCustomerId());
+                        passport.clearBPD();
+                        passport.clearUPD();
+                        
+                        IHandlerData handlerData = new HBCIHandler(this.hbciversion, passport);
                         Crypt crypt=CryptFactory.getInstance().createCrypt(handlerData, cryptedMsg);
                         try {
                             decryptedMsgData=new StringBuffer(crypt.decryptIt());
@@ -437,7 +449,7 @@ public class Dialog
                 }
         	}
         }
-        
+                
         return localPassport;
     }
     

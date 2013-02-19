@@ -48,6 +48,7 @@ public class LocalPassportPinTan
 
         setCountry(sd.getCountry());
         setBLZ(sd.getBLZ());
+        setHost(sd.getHost(0));
     }
     
     // for encryption end for verifying signatures

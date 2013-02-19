@@ -33,7 +33,8 @@ public class HBCICallbackInternal
     public void callback(HBCIPassport passport,int reason,String msg,int datatype,StringBuffer retData)
     {
         HBCIUtils.log("there occured a callback, which should never happen",HBCIUtils.LOG_WARN);
-        super.callback(passport,reason,msg,datatype,retData);
+        
+        //super.callback(passport,reason,msg,datatype,retData);
     }
     
     public void log(String msg,int level,Date date,StackTraceElement trace)

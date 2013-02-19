@@ -35,7 +35,11 @@ public class RMIListenerImpl
     extends UnicastRemoteObject 
     implements RMIListener
 {
-    private boolean initialized;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 69234264739248637L;
+	private boolean initialized;
     
     public RMIListenerImpl()
         throws RemoteException
@@ -47,7 +51,7 @@ public class RMIListenerImpl
     {
         try {
             if (!initialized) {
-                HBCIUtils.init(null,null,new HBCICallbackInternal());
+                HBCIUtils.init(new Properties(), new HBCICallbackInternal());
                 initialized=true;
             } else {
                 HBCIUtils.initThread(new Properties(),null);

@@ -61,7 +61,8 @@ public class HBCIServer
         
         // Serverdaten initialisieren
         ServerData.getInstance().setCallbackObject(callback);
-        HBCIUtils.init(null,null,new HBCICallbackInternal());
+        //HBCIUtils.init(null,null,new HBCICallbackInternal());
+        HBCIUtils.init(new Properties(), new HBCICallbackInternal());        
         HBCIUtils.setParam("log.loglevel.default",Integer.toString(dataStore.getLogLevel()));
         ServerData.getInstance().init(dataStore);
     }
