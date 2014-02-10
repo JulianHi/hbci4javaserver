@@ -56,6 +56,11 @@
             <fileset dir="demo/server-data-template"/>
         </copy>
         <mkdir dir="${dist}/demo/server-data-backend"/>
+		
+		<mkdir dir="${dist}/server"/>
+        <jar destfile="${dist}/server/hbci4java-server.jar" basedir="${classes}" compress="true"/>
+		<jar destfile="${dist}/server/hbci4java-server-demo.jar" basedir="${democlasses}" compress="true"/>
+
     </target>
 
     <target name="clean"
