@@ -60,11 +60,11 @@ public class LocalPassportPinTan
         HBCIUtils.log("creating local pintan passport for userid "+userid,HBCIUtils.LOG_INFO);
         
         ServerData sd=ServerData.getInstance();
-        
         setCountry(sd.getCountry());
         setBLZ(sd.getBLZ());
-        setUserId(userid);
+        setUserId(userid);	
         setSysId(PassportTools.getInstance().calculateSysId(userid,dialog.getSysId()));
+		
         // bpd wird bentigt, um zu ermitteln, ob ein gv eine tan bentigt
         setBPD(dialog.getBPD()); 
         

@@ -26,8 +26,11 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.math.BigDecimal;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -309,22 +312,31 @@ public class TestServer
             System.out.println("adding saldo for account "+acc.toString());
             
             // kontosaldo in antwort einstellen (antwortdaten erzeugen)
-            double saldo=backend.getSaldo(acc);
+            BigDecimal saldo=backend.getSaldo(acc);
+            
+                        
+            DecimalFormat valueFormat = new DecimalFormat("0.00"); //replaced ## with 00
+            DecimalFormatSymbols symbols = valueFormat.getDecimalFormatSymbols();
+            symbols.setDecimalSeparator(',');
+            valueFormat.setDecimalFormatSymbols(symbols);
+            valueFormat.setDecimalSeparatorAlwaysShown(true);
+            
+            
             
             context.setData(counter,"KTV.KIK.country",acc.country);
             context.setData(counter,"KTV.KIK.blz",acc.blz);
             context.setData(counter,"KTV.number",acc.number);
             context.setData(counter,"kontobez",acc.type);
             context.setData(counter,"curr",acc.curr);
-            context.setData(counter,"booked.CreditDebit",saldo>=0?"C":"D");
-            context.setData(counter,"booked.value",HBCIUtils.value2String(Math.abs(saldo)));
-            context.setData(counter,"booked.curr","EUR");
+            context.setData(counter,"booked.CreditDebit",saldo.compareTo(new BigDecimal(0))>=0?"C":"D");
+            context.setData(counter,"booked.BTG.value",HBCIUtils.bigDecimal2String(saldo));
+            context.setData(counter,"booked.BTG.curr","EUR");
             
             Date now=new Date();
-            context.setData(counter,"booked.date",HBCIUtils.date2String(now));
-            context.setData(counter,"booked.time",HBCIUtils.time2String(now));
-            context.setData(counter,"Timestamp.date",HBCIUtils.date2String(now));
-            context.setData(counter,"Timestamp.time",HBCIUtils.time2String(now));
+            context.setData(counter,"booked.date",HBCIUtils.date2StringISO(now));
+            context.setData(counter,"booked.time",HBCIUtils.time2StringISO(now));
+            context.setData(counter,"Timestamp.date",HBCIUtils.date2StringISO(now));
+            context.setData(counter,"Timestamp.time",HBCIUtils.time2StringISO(now));
             
             context.addStatus(null,"0020","Daten zurckgemeldet",null);
             counter++;
@@ -422,7 +434,7 @@ public class TestServer
         other.name2=name2;
         
         if (terminated)
-            System.out.print("terminated ("+HBCIUtils.date2String(date)+") ");
+            System.out.print("terminated ("+HBCIUtils.date2StringISO(date)+") ");
         System.out.println("request for "+(inverse?"debit note":"transfer"));
         System.out.println("  my account:    "+my);
         System.out.println("  other account: "+other);
@@ -471,8 +483,8 @@ public class TestServer
 
         if (!onlyNew) {
             String st;
-            from=(st=context.getJobData("startdate"))!=null?HBCIUtils.string2Date(st):null;
-            to=(st=context.getJobData("enddate"))!=null?HBCIUtils.string2Date(st):null;
+            from=(st=context.getJobData("startdate"))!=null?HBCIUtils.string2DateISO(st):null;
+            to=(st=context.getJobData("enddate"))!=null?HBCIUtils.string2DateISO(st):null;
             if (to!=null) {
                 Calendar cal=Calendar.getInstance();
                 cal.setTime(to);
@@ -533,9 +545,9 @@ public class TestServer
             context.addStatus("enddate","9210","Endedatum liegt vor Startdatum",null);
         } else {
             System.out.println("returning status protocol for timerange '"+
-                    ((startdate!=null)?HBCIUtils.date2String(startdate):"any")+
+                    ((startdate!=null)?HBCIUtils.date2StringISO(startdate):"any")+
                     "' to '"+
-                    ((enddate!=null)?HBCIUtils.date2String(enddate):"any")+
+                    ((enddate!=null)?HBCIUtils.date2StringISO(enddate):"any")+
                     "'");
             
             StatusProtEntry[] entries=((MyDataStore)dataStore).getStatusProt(
@@ -549,8 +561,8 @@ public class TestServer
                 if (entry.segref!=null) {
                     context.setData(i,"segref",entry.segref);
                 }
-                context.setData(i,"date",HBCIUtils.date2String(entry.timestamp));
-                context.setData(i,"time",HBCIUtils.time2String(entry.timestamp));
+                context.setData(i,"date",HBCIUtils.date2StringISO(entry.timestamp));
+                context.setData(i,"time",HBCIUtils.time2StringISO(entry.timestamp));
                 context.setData(i,"RetVal.code",entry.retval.code);
                 if (entry.retval.deref!=null) {
                     context.setData(i,"RetVal.ref",entry.retval.deref);

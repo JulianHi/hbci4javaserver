@@ -22,14 +22,11 @@
 package org.kapott.demo.hbci.server.backend;
 
 import java.io.File;
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.Random;
 
 import org.kapott.hbci.GV_Result.GVRKUms;
 import org.kapott.hbci.manager.HBCIUtils;
@@ -88,17 +85,20 @@ public class MyBackend {
             Element content = doc.getDocumentElement();
 
             GVRKUms.UmsLine entry = new GVRKUms.UmsLine();
-            double saldoOld = getSaldo(my);
+            BigDecimal saldoOld = getSaldo(my);
 
             entry.bdate = new Date();
             entry.valuta = entry.bdate;
             //entry.cd = btg.getLongValue() < 0 ? "D" : "C";
             entry.other = other;
-            entry.value = new Value(Math.abs(btg.getDoubleValue()), btg.getCurr());
 
-            double v = (Math.round(saldoOld * 100.0) + Math.round(btg.getDoubleValue() * 100.0)) / 100.0;
+            entry.value = new Value(btg.getBigDecimalValue().abs(), btg.getCurr());
+
+            BigDecimal v = new BigDecimal(0);
+            v.add(saldoOld).add(btg.getBigDecimalValue());
+            
             entry.saldo = new Saldo();
-            entry.saldo.value = new Value(Math.abs(v), btg.getCurr());
+            entry.saldo.value = new Value(v.abs(), btg.getCurr());
             //entry.saldo.cd = (v < 0) ? "D" : "C";
             entry.saldo.timestamp = entry.valuta;
 
@@ -115,18 +115,18 @@ public class MyBackend {
     }
 
     // saldo fr bestimmtes konto zurckgeben
-    public double getSaldo(Konto acc) {
+    public BigDecimal getSaldo(Konto acc) {
         try {
             File dataFile = new File(directory + File.separator + acc.customerid + "_transfers_" + acc.number);
             Document doc = xml.getFileContent(dataFile, "transfers");
             Element content = doc.getDocumentElement();
 
-            double saldo = 0;
+            BigDecimal saldo = new BigDecimal(0);
             NodeList transfer_entries = content.getElementsByTagName("transfer");
             int len;
             if (transfer_entries != null && (len = transfer_entries.getLength()) != 0) {
                 Element lastEntry = (Element) transfer_entries.item(len - 1);
-                saldo = xml.readValueElement(lastEntry, "saldo", null).getDoubleValue();
+                saldo = xml.readValueElement(lastEntry, "saldo", null).getBigDecimalValue();
             }
 
             return saldo;
@@ -169,7 +169,7 @@ public class MyBackend {
             if (transferArray.size() != 0) {
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyMMdd");
 
-                DecimalFormat valueFormat = new DecimalFormat("0.##");
+                DecimalFormat valueFormat = new DecimalFormat("0.00"); //replaced ## with 00
                 DecimalFormatSymbols symbols = valueFormat.getDecimalFormatSymbols();
                 symbols.setDecimalSeparator(',');
                 valueFormat.setDecimalFormatSymbols(symbols);
@@ -200,8 +200,8 @@ public class MyBackend {
                     }
 
                     // werte aus eintrag extrahieren
-                    double saldo = xml.readValueElement(transfer, "saldo", null).getDoubleValue();
-                    double value = xml.readValueElement(transfer, "value", null).getDoubleValue();
+                    BigDecimal saldo = xml.readValueElement(transfer, "saldo", null).getBigDecimalValue();
+                    BigDecimal value = xml.readValueElement(transfer, "value", null).getBigDecimalValue();
 
                     if (isFirstOfDay) { // startsaldo schreiben
                         ret.append("\r\n");
@@ -209,11 +209,12 @@ public class MyBackend {
                         ret.append(":25:" + my.blz + "/" + my.number + my.curr + "\r\n");
                         ret.append(":28C:0\r\n");
 
-                        double saldoBefore = (Math.round(saldo * 100.0) - Math.round(value * 100.0)) / 100.0;
+                        BigDecimal saldoBefore = new BigDecimal(0).add(saldo).subtract(value);
                         ret.append(":60F:" +
-                                (saldoBefore < 0 ? "D" : "C") + bdate_st + my.curr +
-                                valueFormat.format(Math.abs(saldoBefore)) + "\r\n");
+                                (saldoBefore.compareTo(new BigDecimal(0)) < 0 ? "D" : "C") + bdate_st + my.curr +
+                                valueFormat.format(saldoBefore.abs()) + "\r\n");
 
+                        
                         isFirstOfDay = false;
                     }
 
@@ -222,8 +223,8 @@ public class MyBackend {
                     String instref;
 
                     ret.append(":61:" + valuta_st + bdate_st.substring(2) +   // daten
-                            (value < 0 ? "D" : "C") + my.curr.charAt(2) +    // value
-                            valueFormat.format(Math.abs(value)) +
+                            (value.compareTo(new BigDecimal(0)) < 0 ? "D" : "C") + my.curr.charAt(2) +    // value
+                            valueFormat.format(value.abs()) +
                             "NTRF" +
                             xml.readElement(transfer, "customerref", "NONREF") +   // customerref
                             ((instref = xml.readElement(transfer, "instref", null)) != null ? "//" + instref : ""));  // instref
@@ -232,8 +233,9 @@ public class MyBackend {
                     Value orig_value = xml.readValueElement(transfer, "orig", null);
                     boolean additionalAppended = false;
                     if (orig_value != null) {
-                        ret.append("\r\n//OCMT/" + orig_value.getCurr() + valueFormat.format(orig_value.getDoubleValue()) + "/");
+                        ret.append("\r\n//OCMT/" + orig_value.getCurr() + valueFormat.format(orig_value.getBigDecimalValue()) + "/");
                         additionalAppended = true;
+                        
                     }
 
                     // gebhren
@@ -241,7 +243,8 @@ public class MyBackend {
                     if (charge_value != null) {
                         if (!additionalAppended)
                             ret.append("\r\n/");
-                        ret.append("/CHGS/" + charge_value.getCurr() + valueFormat.format(charge_value.getDoubleValue()) + "/");
+                        ret.append("/CHGS/" + charge_value.getCurr() + valueFormat.format(charge_value.getBigDecimalValue()) + "/");
+                        
                     }
 
                     ret.append("\r\n");
@@ -303,8 +306,10 @@ public class MyBackend {
                     if (!bdate_st.equals(nextDate)) {
                         // anschlusssaldo mit den *alten* daten erzeugen
                         ret.append(":62F:" +
-                                (saldo < 0 ? "D" : "C") + bdate_st + "EUR" +
-                                valueFormat.format(Math.abs(saldo)) + "\r\n");
+                                (saldo.compareTo(new BigDecimal(0)) < 0 ? "D" : "C") + bdate_st + "EUR" +
+                                valueFormat.format(saldo.abs()) + "\r\n");
+                        
+                        
                         ret.append("-");
 
                         if (nextDate == null) {

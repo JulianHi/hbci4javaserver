@@ -23,6 +23,7 @@ package org.kapott.demo.hbci.server.backend;
 
 import java.io.File;
 import java.lang.String;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -195,7 +196,7 @@ public class XMLTools
         Element ret=doc.createElement(name);
         
         if (btg!=null) {
-            ret.appendChild(createElement(doc,"value",Long.toString(Math.round(btg.getDoubleValue()*10000))));
+            ret.appendChild(createElement(doc,"value",btg.getBigDecimalValue().toString()));
             ret.appendChild(createElement(doc,"curr",btg.getCurr()));
         }
         
@@ -209,7 +210,7 @@ public class XMLTools
         Element elem_value=getChildElement(elem,name);
         if (elem_value!=null) {
             Value val=new Value();
-            val.setValue(Double.parseDouble(readElement(elem_value,"value","0"))/10000.0);
+            val.setValue(new BigDecimal(readElement(elem_value,"value","0")));
             val.setCurr(readElement(elem_value,"curr",null));
 
             if (val.getCurr()!=null)
@@ -267,7 +268,7 @@ public class XMLTools
             ret.appendChild(createDateTimeElement(doc,"valuta",line.valuta));
             ret.appendChild(createAccountElement(doc,"other",line.other));
             
-            Value btg=new Value(line.value.getDoubleValue(),line.value.getCurr());
+            Value btg=new Value(line.value.getBigDecimalValue(),line.value.getCurr());
             //if (line.cd.equals("D"))
             //    btg.value=-btg.value;
             ret.appendChild(createValueElement(doc,"value",btg));
