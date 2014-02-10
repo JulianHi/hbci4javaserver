@@ -64,6 +64,8 @@ public class HBCIServer
         //HBCIUtils.init(null,null,new HBCICallbackInternal());
         HBCIUtils.init(new Properties(), new HBCICallbackInternal());        
         HBCIUtils.setParam("log.loglevel.default",Integer.toString(dataStore.getLogLevel()));
+        HBCIUtils.setParam("log.filter",Integer.toString(dataStore.getFilterLevel()));        
+        
         ServerData.getInstance().init(dataStore);
     }
     
@@ -114,6 +116,9 @@ public class HBCIServer
                         HBCIUtils.initThread(new Properties(), null);
                         HBCIUtils.setParam("log.loglevel.default",
                                 Integer.toString(ServerData.getInstance().getLogLevel()));
+                        
+                        HBCIUtils.setParam("log.filter",Integer.toString(ServerData.getInstance().getFilterLevel()));
+                                               
                         listener.start();
                     }
                 }.start();

@@ -158,6 +158,12 @@ public class MyDataStore
         return Integer.parseInt(getSingleLine("loglevel"));
     }
     
+    // Filterlevel aus Datei "filterlevel" zurckgeben
+    public int getFilterLevel()
+    {
+        return Integer.parseInt(getSingleLine("filterlevel"));
+    }
+    
     // Verbindungsarbten zurckgeben
     public String[] getListeners()
     {

@@ -61,6 +61,7 @@ public class ServerData
     private List      listeners;
     private boolean   anonAllowed;
     private int       loglevel;
+    private int       filterlevel;
     private Hashtable bpds;     // "210" --> BPD
     private Hashtable rdhKeys;     // "S_1_1_PRIV" --> hbcikey
     private Long      sigid;
@@ -128,6 +129,7 @@ public class ServerData
     private void initBasicData()
     {
         loglevel=dataStore.getLogLevel();
+        filterlevel = dataStore.getFilterLevel();
         anonAllowed=dataStore.isAnonAllowed();
         
         bpds=new Hashtable();
@@ -544,6 +546,11 @@ public class ServerData
     public int getLogLevel()
     {
         return loglevel;
+    }
+    
+    public int getFilterLevel()
+    {
+        return filterlevel;
     }
     
     public Properties getBPD(String version)

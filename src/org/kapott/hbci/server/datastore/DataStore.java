@@ -437,6 +437,14 @@ public String[][] getCommData(String hbciVersion)
         @return Loglevel fr HBCI4Java-Server-Logausgaben */
     public int getLogLevel();
     
+    /** Ermitteln des Filter-Levels, mit welchem der HBCI4Java-Server-Code Logausgaben
+    erzeugen soll. Die Logausgaben werden via 
+    {@link org.kapott.hbci.server.ServerCallback#log(String,int,java.util.Date,StackTraceElement)} zur
+    HBCI-Anwendung gesandt. Gltige Werte fr das Log-Level sind in der Dokumentation
+    zu {@link org.kapott.hbci.manager.HBCIUtils#LOG_DEBUG HBCIUtils} aufgefhrt.
+    @return Loglevel fr HBCI4Java-Server-Logausgaben */
+    public int getFilterLevel();
+    
     /* TODO doku fehlt */
     public void addToStatusProt(String userid,StatusProtEntry entry);
 }

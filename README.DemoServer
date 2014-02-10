@@ -148,6 +148,15 @@ Einiges zur Installation/Laufzeit des Demo-Servers
               einen Wert zwischen 0 (kein Logging) und 5 (Debug-Logging), welcher
               das Level angibt, mit welchem der HBCI-Server Logausgaben erzeugen
               soll
+           . filterlevel
+              einen Wert zwischen 0 (kein Filter vom LOG) und 3 (FILTER_MOST), welcher
+              das Level angibt, mit welchem der HBCI-Server Logausgaben Filtern soll
+            	0 - Es wird gar nicht gefiltert. Alle Daten erscheinen unbeschnitten im Log.
+            	1 - Es werden nur "geheime" Daten gefiltert (Passwörter, PINs, TANs, ...)
+            	2 - Es werden zusätzlich alle Daten gefiltert, anhand derer eine Identifikation
+                    moeglich waere (Kontonummern, Namen, User-IDs, Kunden-IDs)
+            	3 - Es werden auch weniger sensible Daten gefiltert
+              
         der Inhalt aller anderen Dateien kann frs Erste beibehalten werden, das
         damit erzeugte Server-Verhalten wird im nchsten Abschnitt
         ("Default-Serververhalten") beschrieben.
