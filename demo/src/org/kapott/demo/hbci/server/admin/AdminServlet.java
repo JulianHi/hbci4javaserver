@@ -291,7 +291,7 @@ public class AdminServlet
             // kontoinformationen anzeigen
             out.println("<p>Konten, auf die zugegriffen werden kann</p>");
             out.println("<table border=\"1\" frame=\"box\" rules=\"groups\" cellpadding=\"8\">");
-            out.println("<thead><tr bgcolor=\"dddddd\"><th>#</th><th>Kontonummer</th><th>Kunden-ID</th><th>Kontoinhaber</th><th>Konto-Bezeichnung</th><th>Lschen</th></tr></thead>");
+            out.println("<thead><tr bgcolor=\"dddddd\"><th>#</th><th>Kontonummer</th></th><th>IBAN</th><th>Kunden-ID</th><th>Kontoinhaber</th><th>Konto-Bezeichnung</th><th>Lschen</th></tr></thead>");
             
             out.println("<tbody>");
             Konto[] old_accounts=admin.getAccounts(userid);
@@ -304,6 +304,7 @@ public class AdminServlet
                 out.println("<tr bgcolor=\""+((i&1)!=0?"#dddddd":"#c0c0c0")+"\">");
                 out.println("<td>"+(i+1)+"</td>");
                 out.println("<td><input type=\"text\" name=\"number_"+i+"\" value=\""+(i<len?acc.number:"")+"\"></td>");
+                out.println("<td><input type=\"text\" name=\"iban_"+i+"\" value=\""+(i<len?acc.iban:"")+"\"></td>");
                 out.println("<td><input type=\"text\" name=\"customerid_"+i+"\" value=\""+(i<len?acc.customerid:"")+"\"></td>");
                 out.println("<td><input type=\"text\" name=\"name_"+i+"\" value=\""+(i<len?acc.name:"")+"\"></td>");
                 out.println("<td><input type=\"text\" name=\"type_"+i+"\" value=\""+(i<len?acc.type:"")+"\"></td>");
@@ -511,14 +512,16 @@ public class AdminServlet
                 // Kontodaten extrahieren und berprfen
                 ArrayList new_accounts=new ArrayList();
                 String blz=admin.getBLZ();
+                String bic=admin.getBIC();
                 for (int i=0;;i++) {
                     st=request.getParameter("del_"+i);
                     // wenn schlssel nicht als "delete" markiert ist
                     if (st==null || !st.equals("delete")) {
                         // nummer berprfen
-                        String number=request.getParameter("number_"+i);
+                    	String number=request.getParameter("number_"+i);
+                    	String iban=request.getParameter("iban_"+i);
                         // keine weiteren kontodaten, wenn nummer leer ist
-                        if (number==null || number.length()==0)
+                        if (number==null || number.length()==0 || iban==null || iban.length()==0)
                             break;
                         
                         String customerid=request.getParameter("customerid_"+i);
@@ -532,6 +535,8 @@ public class AdminServlet
                             
                             Konto acc=new Konto("DE",blz,number);
                             acc.curr="EUR";
+                            acc.iban=iban;
+                            acc.bic=bic;
                             acc.customerid=customerid;
                             acc.name=name;
                             acc.type=type;

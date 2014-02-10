@@ -43,6 +43,11 @@ public class ServerAdminImpl
         return dataStore.getBLZ();
     }
     
+    public String getBIC()
+    {
+        return dataStore.getBIC();
+    }
+    
     public ServerAdminImpl(HBCIServer server,MyDataStore dataStore,MyBackend backend)
         throws RemoteException
     {
@@ -119,7 +124,7 @@ public class ServerAdminImpl
         String[] accdata=new String[accounts.length];
         for (int i=0;i<accounts.length;i++) {
             Konto acc=accounts[i];
-            accdata[i]=acc.number+"|"+acc.type+"|"+acc.name+"|"+acc.customerid;
+            accdata[i]=acc.number+"|"+acc.iban+"|"+acc.type+"|"+acc.name+"|"+acc.customerid;
         }
         dataStore.storeMultipleLines(accdata,userid+"_accounts");
     }

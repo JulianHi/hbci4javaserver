@@ -29,8 +29,11 @@ import org.kapott.hbci.structures.Konto;
 public interface ServerAdmin 
     extends Remote 
 {
-    public String getBLZ()
-        throws RemoteException;
+	public String getBLZ()
+	        throws RemoteException;
+	
+	public String getBIC()
+	        throws RemoteException;
     
     public boolean verify(String userid,String passwd)
         throws RemoteException;

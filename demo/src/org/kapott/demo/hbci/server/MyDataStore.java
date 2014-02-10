@@ -182,6 +182,12 @@ public class MyDataStore
         return getSingleLine("blz");
     }
     
+    // BIC aus Datei "bic" zurckmelden
+    public String getBIC()
+    {
+        return getSingleLine("bic");
+    }
+    
     // Name der "Testbank" aus Datei "kiname" auslesen und zurckmelden
     public String getKIName()
     {
@@ -371,11 +377,13 @@ public class MyDataStore
             StringTokenizer tok=new StringTokenizer(accountData[i],"|");
             Konto acc=new Konto();
             acc.number=tok.nextToken();
+            acc.iban=tok.nextToken();
             acc.type=tok.nextToken();
             acc.name=tok.nextToken();
             acc.customerid=tok.nextToken();
             acc.country=getCountry();
             acc.blz=getBLZ();
+            acc.bic=getBIC();
             acc.curr="EUR";
             ret.add(acc);
         }
