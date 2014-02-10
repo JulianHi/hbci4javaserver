@@ -19,14 +19,12 @@
 package org.kapott.hbci.server;
 
 import org.kapott.hbci.manager.IHandlerData;
-import org.kapott.hbci.manager.HBCIKernelImpl;
 import org.kapott.hbci.manager.MsgGen;
 import org.kapott.hbci.manager.HBCIUtilsInternal;
 import org.kapott.hbci.passport.HBCIPassport;
 import org.kapott.hbci.passport.HBCIPassportInternal;
 import org.kapott.hbci.exceptions.HBCI_Exception;
 import org.kapott.hbci.exceptions.InvalidArgumentException;
-import org.kapott.hbci.exceptions.InvalidUserDataException;
 
 
 
@@ -50,33 +48,15 @@ public final class HBCILocalHandler
             if (hbciversion.length()==0)
                 throw new InvalidArgumentException(HBCIUtilsInternal.getLocMsg("EXCMSG_NO_HBCIVERSION"));
 
-//            this.kernel=new HBCIKernelImpl(this,hbciversion);
             
             this.passport=(HBCIPassportInternal)passport;
             this.passport.setParentHandlerData(this);
 
   		  	this.msggen = msggen;
-            //registerInstitute();
-            //registerUser();
-            
-/*            if (!passport.getHBCIVersion().equals(hbciversion)) {
-                this.passport.setHBCIVersion(hbciversion);
-                this.passport.saveChanges();
-            }
-*/
-  //          dialogs=new Hashtable<String, HBCIDialog>();
+
         } catch (Exception e) {
             throw new HBCI_Exception(HBCIUtilsInternal.getLocMsg("EXCMSG_CANT_CREATE_HANDLE"),e);
         }
-        
-        // wenn in den UPD noch keine SEPA-Informationen ueber die Konten enthalten
-        // sind, versuchen wir, diese zu holen
-    /*    Properties upd=passport.getUPD();
-        if (upd!=null && !upd.getProperty("_fetchedSEPA","").equals("1")) {
-        	// wir haben UPD, in denen aber nicht "_fetchedSEPA=1" drinsteht
-        	updateSEPAInfo();
-        }
-	*/
 	}
 	
     public HBCIPassport getPassport()
@@ -86,7 +66,6 @@ public final class HBCILocalHandler
     public MsgGen getMsgGen()
 	{
 		return msggen;
-		//return kernel.getMsgGen();
 	}
 	
 }
