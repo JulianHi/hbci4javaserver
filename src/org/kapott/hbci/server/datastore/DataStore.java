@@ -67,6 +67,11 @@ public interface DataStore
     /** Bankleitzahl fr Kreditinstitut zurckgeben
         @return BLZ */
     public String getBLZ();
+    
+    /** BIC fuer Kreditinstitut zurueckgeben
+    @return BIC */
+    public String getBIC();
+
     /** Namen des Kreditinstitutes zurckgeben
         @return Name der Bank */
     public String getKIName();
@@ -216,6 +221,22 @@ public String[][] getCommData(String hbciVersion)
         @param gvversion Versionsnummer des entsprechenden Geschftsvorfalles
         @return Mindestanzahl an bentigten Signaturen fr diesen GV */
     public int getGVMinSigs(String gvname,int gvversion);
+    
+    
+    /** TODO: beschreibung hinzufügen
+    @param gvname Name des Geschftsvorfalles, fr die Mindestanzahl Signaturen 
+    ermittelt werden soll
+    @param gvversion Versionsnummer des entsprechenden Geschftsvorfalles
+    @return Mindestanzahl an bentigten Signaturen fr diesen GV */
+    public boolean hasGVSecclass(String gvname,int gvversion);
+    
+    /** TODO: beschreibung hinzufügen
+    @param gvname Name des Geschftsvorfalles, fr die Mindestanzahl Signaturen 
+    ermittelt werden soll
+    @param gvversion Versionsnummer des entsprechenden Geschftsvorfalles
+    @return Mindestanzahl an bentigten Signaturen fr diesen GV */
+    public int getGVSecclass(String gvname,int gvversion);
+    
     
     /** Ermitteln der Parameter fr einen Geschftsvorfall. Hier muss ein 
         <code>Property</code>-Objekt zurckgegeben werden, welches als <code>key</code>

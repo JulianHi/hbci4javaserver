@@ -234,6 +234,11 @@ public class ServerData
                     bpd.setProperty(segheader+".maxnum",Integer.toString(dataStore.getGVMaxNum(gvname,version)));
                     bpd.setProperty(segheader+".minsigs",Integer.toString(dataStore.getGVMinSigs(gvname,version)));
                     
+                    if(dataStore.hasGVSecclass(gvname, version))
+                    {
+                    	bpd.setProperty(segheader+".secclass",Integer.toString(dataStore.getGVSecclass(gvname,version)));
+                    }                                                            
+                    
                     // parameter fr diesen gv holen
                     String paramheader=segheader+".Par"+gvname;
                     Properties params=dataStore.getGVParams(gvname,version);
