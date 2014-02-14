@@ -568,4 +568,17 @@ public class MyDataStore
             throw new RuntimeException(e);
         }
     }
+
+	@Override
+	public boolean hasGVSecclass(String gvname, int gvversion) {
+		
+		File aFile = new File(directory+File.separator+gvname+"_secclass");
+		
+		return aFile.exists();
+	}
+
+	@Override
+	public int getGVSecclass(String gvname, int gvversion) {
+		return Integer.parseInt(getSingleLine(gvname+"_secclass"));
+	}
 }
