@@ -79,6 +79,14 @@ public class MyBackend {
     // my ist immer eigenes konto; vorzeichen von btg.value gibt an, ob etwas
     // dazukommt oder abgeht
     public void addTransfer(Konto my, Konto other, Value btg, String[] usage, String key, String addkey) {
+    	addTransfer(my, other, btg, usage, key, addkey, "", false);
+    }
+    
+    public void addSepaTransfer(Konto my, Konto other, Value btg, String[] usage, String key, String addkey, String customref) {
+    	addTransfer(my, other, btg, usage, key, addkey, customref, true);
+    }
+    
+    public void addTransfer(Konto my, Konto other, Value btg, String[] usage, String key, String addkey, String customref, boolean isSepa) {
         try {
             File dataFile = new File(directory + File.separator + my.customerid + "_transfers_" + my.number);
             Document doc = xml.getFileContent(dataFile, "transfers");
@@ -86,26 +94,44 @@ public class MyBackend {
 
             GVRKUms.UmsLine entry = new GVRKUms.UmsLine();
             BigDecimal saldoOld = getSaldo(my);
-
+            entry.isSepa = isSepa;
+            
+            if(isSepa)
+            {
+            	entry.gvcode = key;
+            	other.blz = other.bic;
+            	other.number = other.iban;
+            }
+            else
+            	entry.gvcode = "0" + key;
+            
             entry.bdate = new Date();
             entry.valuta = entry.bdate;
             //entry.cd = btg.getLongValue() < 0 ? "D" : "C";
             entry.other = other;
 
             entry.value = new Value(btg.getBigDecimalValue().abs(), btg.getCurr());
+            
 
-            BigDecimal v = new BigDecimal(0);
-            v.add(saldoOld).add(btg.getBigDecimalValue());
+            
+            BigDecimal v = saldoOld.add(btg.getBigDecimalValue());
+            
+            HBCIUtils.log("JUMPPOINT"+v.toString(),HBCIUtils.LOG_DEBUG);
+            HBCIUtils.log("Saldo:"+saldoOld.toString()+" btg:"+btg.getBigDecimalValue().toString()+" 0+saldoOld+btg:"+v.toString(),HBCIUtils.LOG_DEBUG);
+            
             
             entry.saldo = new Saldo();
-            entry.saldo.value = new Value(v.abs(), btg.getCurr());
+            entry.saldo.value = new Value(v, btg.getCurr());
             //entry.saldo.cd = (v < 0) ? "D" : "C";
+                        
             entry.saldo.timestamp = entry.valuta;
-
             entry.usage = java.util.Arrays.asList(usage);
-            entry.gvcode = "0" + key;
+ 
+            
+            
             entry.addkey = addkey;
-
+            entry.customerref = customref;
+            
             String id = Long.toString(random.nextLong()).substring(1);
             content.appendChild(xml.createUmsLineElement(doc, "transfer", entry, id));
             xml.transform(doc, dataFile);
@@ -169,7 +195,7 @@ public class MyBackend {
             if (transferArray.size() != 0) {
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyMMdd");
 
-                DecimalFormat valueFormat = new DecimalFormat("0.00"); //replaced ## with 00
+                DecimalFormat valueFormat = new DecimalFormat("0.##");
                 DecimalFormatSymbols symbols = valueFormat.getDecimalFormatSymbols();
                 symbols.setDecimalSeparator(',');
                 valueFormat.setDecimalFormatSymbols(symbols);
