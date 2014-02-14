@@ -267,6 +267,28 @@ public class JobContext
         return ok?acc:null;
     }
     
+    private Konto findSepaAccountInList(Konto other,Konto[] accounts)
+    {
+        boolean ok=false;
+        
+        // kontodaten aus job extrahieren
+        
+        // berprfen, ob kontodaten aus request mit einem der gltigen user-konten bereinstimmt
+        Konto acc=null;
+        for (int i=0;i<accounts.length;i++) {
+            acc=accounts[i];
+            if (acc.bic.equals(other.bic) &&
+                    acc.iban.equals(other.iban)) {
+                
+                // konto gefunden
+                ok=true;
+                break;
+            }
+        }
+        
+        return ok?acc:null;
+    }
+    
     /** Extrahieren einer Kontoverbindung und Zurckgeben des entsprechenden 
         <code>Konto</code>-Objektes. Diese Methode gibt <code>null</code> 
         zurck, wenn es fr den aktuellen Nutzer/Kunden kein Konto mit der
@@ -313,6 +335,17 @@ public class JobContext
         }
             
         return (acc!=null && acc.number!=null)?acc:null;
+    }
+    
+    public Konto extractOtherSEPAAccount(Konto other)
+    {
+        Konto acc=findSepaAccountInList(other,getAllAccounts());
+        
+        if (acc==null) {
+            acc=other;
+        }
+            
+        return (acc!=null && acc.number!=null && acc.iban!=null)?acc:null;
     }
     
     /** Geldbetrag aus Auftragsdaten extrahieren.
