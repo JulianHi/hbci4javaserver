@@ -29,12 +29,7 @@ import java.util.Hashtable;
 import java.util.Properties;
 
 import org.kapott.hbci.exceptions.HBCI_Exception;
-import org.kapott.hbci.manager.HBCIHandler;
-import org.kapott.hbci.manager.HBCIKernel;
-import org.kapott.hbci.manager.HBCIKernelFactory;
-import org.kapott.hbci.manager.HBCIKernelImpl;
 import org.kapott.hbci.manager.HBCIUtils;
-import org.kapott.hbci.manager.HBCIUtilsInternal;
 import org.kapott.hbci.manager.IHandlerData;
 import org.kapott.hbci.manager.MsgGen;
 import org.kapott.hbci.passport.HBCIPassport;
@@ -157,11 +152,12 @@ public class Dialog
                         throw new HBCI_Exception("error while decrypting message",e);
                     }
                 }
-
+                
                 // nachrichtentyp ermitteln (alle msgdefs durchgehen und versuchen zu parsen)
                 // *** hier evtl. nicht *alle* msgs checken, sondern nur die, die an dieser
                 // stelle sinn machen
                 Document syntax=msggen.getSyntax();
+                
                 NodeList msgdefs=syntax.getElementsByTagName("MSGdef");
                 int len=msgdefs.getLength();
 
@@ -194,7 +190,7 @@ public class Dialog
                                     decryptedMsgData.length(),
                                     msggen,true);
                         } catch (Exception e) {
-                            HBCIUtils.log("failed",HBCIUtils.LOG_DEBUG);
+                            HBCIUtils.log("failed: "+e.getMessage(),HBCIUtils.LOG_DEBUG);
                         }
 
                         // wenn message parsen geklappt hat
@@ -293,7 +289,7 @@ public class Dialog
             bpd=ServerData.getInstance().getBPD(hbciversion);
         }
     }
-
+   
     // nachrichtengenerator fr eine bestimmte hbci-version erzeugen
     private void createMsgGen(String hbciversion)
     {
@@ -321,6 +317,7 @@ public class Dialog
             // message-generator erzeugen
             try {
                 msggen=new MsgGen(syntaxStream);
+               
                 ServerData.getInstance().storeMsgGen(hbciversion,msggen);
 
                 if (Security.getProvider("CryptAlgs4JavaProvider")==null) {
