@@ -144,6 +144,8 @@ Einiges zur Installation/Laufzeit des Demo-Servers
               Servlet hinterlegt (siehe dazu auch README.PinTan).
           . blz
               hier wird die Bankleitzahl eingetragen, die die "Bank" haben soll
+	      . bic
+	          hier wird die BIC eingetragen, die die "Bank" haben soll
           . loglevel
               einen Wert zwischen 0 (kein Logging) und 5 (Debug-Logging), welcher
               das Level angibt, mit welchem der HBCI-Server Logausgaben erzeugen
@@ -188,6 +190,8 @@ Einiges zur Installation/Laufzeit des Demo-Servers
         "demo/server-data" also mit <serverdata> bezeichnet wird, so ist darauf 
         zu achten, dass es beim ersten Server-Start ein leeres Verzeichnis 
         <serverdata>/../<serverdata>-backend gibt.
+		
+		Alternativ kann der Server als WebArchiv mit dem Tomcat server bereit gestellt werden.
         
       - Nach dem Server-Start sieht man eigentlich erst mal nichts ;-)
         Der Server ist jetzt im Prinzip bereit fr die Kommunikation mit

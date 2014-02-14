@@ -20,6 +20,13 @@ Copy _dist/demo/server-data-template_ to _dist/demo/server-data_
 Go to _dist/_ and run
 > $ java -cp ../lib/hbci4java.jar:deploy/WEB-INF/lib/hbci4java-server.jar:demo/deploy/WEB-INF/lib/hbci4java-server-demo.jar org.kapott.demo.hbci.server.TestServer demo/server-data
 
+alternative:
+1. Go to _dist/demo/deployServer_
+2. Edit _WEB-INF/web.xml_ and adjust serverDataPath and logPath value
+3. run:
+> $ jar cfv testserver.war .
+4. Run war file in tomcat
+
 ###Create Admin-Interface
 1. Got to _dist/demo/deploy_
 2. Edit _WEB-INF/web.xml_ and adjust rmiServer value
