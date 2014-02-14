@@ -23,25 +23,33 @@ package org.kapott.demo.hbci.server;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
 import java.io.FileWriter;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Properties;
 
 import org.kapott.demo.hbci.server.backend.MyBackend;
+import org.kapott.hbci.GV.parsers.ISEPAParser;
+import org.kapott.hbci.GV.parsers.SEPAParserFactory;
 import org.kapott.hbci.datatypes.factory.SyntaxDEFactory;
 import org.kapott.hbci.exceptions.HBCI_Exception;
 import org.kapott.hbci.manager.HBCIUtils;
-import org.kapott.hbci.manager.HBCIUtilsInternal;
 import org.kapott.hbci.protocol.factory.DEFactory;
 import org.kapott.hbci.protocol.factory.DEGFactory;
 import org.kapott.hbci.protocol.factory.MSGFactory;
@@ -53,6 +61,7 @@ import org.kapott.hbci.protocol.factory.SEGFactory;
 import org.kapott.hbci.protocol.factory.SFFactory;
 import org.kapott.hbci.security.factory.CryptFactory;
 import org.kapott.hbci.security.factory.SigFactory;
+import org.kapott.hbci.sepa.PainVersion;
 import org.kapott.hbci.server.DialogMgr;
 import org.kapott.hbci.server.HBCIServer;
 import org.kapott.hbci.server.JobContext;
@@ -70,6 +79,8 @@ public class TestServer
     private MyBackend   backend;
     private HBCIServer  server;
     private ServerAdmin serverAdmin;
+    private String logDirectory;
+    private boolean useConsole;
     
     private static final boolean INVERSE=true;
     private static final boolean TERMINATED=true;
@@ -84,7 +95,15 @@ public class TestServer
     
     public void start(String directory,boolean useConsole)
     {
-        // hbci-server mit neuem datastore initialisieren
+    	start(directory,"", useConsole);
+    }
+    
+    public void start(String directory, String logDirectory, boolean useConsole)
+    {
+    	this.logDirectory = logDirectory;
+    	this.useConsole = useConsole;
+    	
+    	// hbci-server mit neuem datastore initialisieren
         dataStore=new MyDataStore(directory);
         backend=new MyBackend(directory+"-backend");
         server=new HBCIServer(dataStore,this);
@@ -93,7 +112,7 @@ public class TestServer
         // zustzlichen thread fr "admin-console" starten
         if (useConsole) {
             new Thread() { public void run() {
-                System.out.println("starting admin console");
+                statusLog("starting admin console");
                 String command=null;
                 
                 while (true) {
@@ -101,7 +120,7 @@ public class TestServer
                     try {
                         command=new BufferedReader(new InputStreamReader(System.in)).readLine();
                     } catch (Exception e) {
-                        System.out.println("problem with STDIN");
+                        statusLog("problem with STDIN");
                         e.printStackTrace();
                         return;
                     }
@@ -121,12 +140,12 @@ public class TestServer
                             } else if (command.equals("cacheinfo")) {
                                 showCacheInfo();
                             } else if (command.length()!=0) {
-                                System.out.println();
-                                System.out.println("unknown command!");
-                                System.out.println("halt     iniletter <user>");
-                                System.out.println("reload   factorystats");
-                                System.out.println("cacheinfo");
-                                System.out.println();
+                                statusLog("");
+                                statusLog("unknown command!");
+                                statusLog("halt     iniletter <user>");
+                                statusLog("reload   factorystats");
+                                statusLog("cacheinfo");
+                                statusLog("");
                             }
                         }  
                     } catch (Exception e) {
@@ -182,40 +201,40 @@ public class TestServer
     
     private void showFactoryStats()
     {
-        System.out.println();
-        System.out.println("msg: "+MSGFactory.getInstance());
-        System.out.println("multisf: "+MultipleSFsFactory.getInstance());
-        System.out.println("sf: "+SFFactory.getInstance());
-        System.out.println("multiseg: "+MultipleSEGsFactory.getInstance());
-        System.out.println("seg: "+SEGFactory.getInstance());
-        System.out.println("multideg: "+MultipleDEGsFactory.getInstance());
-        System.out.println("deg: "+DEGFactory.getInstance());
-        System.out.println("multide: "+MultipleDEsFactory.getInstance());
-        System.out.println("de: "+DEFactory.getInstance());
-        System.out.println("sig: "+SigFactory.getInstance());
-        System.out.println("crypt: "+CryptFactory.getInstance());
-        System.out.println("syntax: "+SyntaxDEFactory.getInstance());
-        System.out.println();
+        statusLog("");
+        statusLog("msg: "+MSGFactory.getInstance());
+        statusLog("multisf: "+MultipleSFsFactory.getInstance());
+        statusLog("sf: "+SFFactory.getInstance());
+        statusLog("multiseg: "+MultipleSEGsFactory.getInstance());
+        statusLog("seg: "+SEGFactory.getInstance());
+        statusLog("multideg: "+MultipleDEGsFactory.getInstance());
+        statusLog("deg: "+DEGFactory.getInstance());
+        statusLog("multide: "+MultipleDEsFactory.getInstance());
+        statusLog("de: "+DEFactory.getInstance());
+        statusLog("sig: "+SigFactory.getInstance());
+        statusLog("crypt: "+CryptFactory.getInstance());
+        statusLog("syntax: "+SyntaxDEFactory.getInstance());
+        statusLog("");
     }
     
     public void showCacheInfo()
     {
-        System.out.println();
-        System.out.println("current dialogids:");
+        statusLog("");
+        statusLog("current dialogids:");
         for (Enumeration e=DialogMgr.getInstance().getDialogs().keys();e.hasMoreElements();) {
-            System.out.println(e.nextElement());
+            statusLog(e.nextElement().toString());
         }
         
-        System.out.println();
-        System.out.println("currently user entries:");
+        statusLog("");
+        statusLog("currently user entries:");
         Hashtable userdata=ServerData.getInstance().getUserData();
         for (Enumeration e=userdata.keys();e.hasMoreElements();) {
             String userid=(String)e.nextElement();
-            System.out.println(userid+":"+
+            statusLog(userid+":"+
                     ((((Hashtable)userdata.get(userid)).size()==0)?"not loaded":"loaded"));
         }
         
-        System.out.println();
+        statusLog("");
     }
 
     // log-ausgaben des servers entgegennehmen
@@ -223,7 +242,7 @@ public class TestServer
     {
         String[] levels={"NON","ERR","WRN","INF","DBG","DB2"};
         StringBuffer ret=new StringBuffer(128);
-        ret.append("<").append(levels[level]).append("> ");
+        ret.append("[").append(levels[level]).append("] ");
         
         SimpleDateFormat df=new SimpleDateFormat("yyyy.MM.dd HH:mm:ss.SSS");
         ret.append("[").append(df.format(date)).append("] ");
@@ -242,19 +261,56 @@ public class TestServer
         // ausgabestream fr server-logs erzeugen
         PrintWriter logStream=null;
         try {
-            logStream=new PrintWriter(new BufferedWriter(new FileWriter("server_"+HBCIUtils.getParam("connection.id")+".log",true)));
+            logStream=new PrintWriter(new BufferedWriter(new FileWriter(logDirectory+"server_"+HBCIUtils.getParam("connection.id")+".log",true)));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
         logStream.println(ret.toString());
         logStream.close();
     }
+    
+    // log-ausgaben des servers entgegennehmen
+    public void statusLog(String msg)
+    {
+        
+        StringBuffer ret=new StringBuffer(128);
+                
+        SimpleDateFormat df=new SimpleDateFormat("yyyy.MM.dd HH:mm:ss.SSS");
+        ret.append("[").append(df.format(new Date())).append("] ");
+                        
+        if (msg!=null)
+            ret.append(msg);
+        
+        
+        //output console
+        if(useConsole)
+        	if(msg.isEmpty())
+        		System.out.println();
+        	else
+        		System.out.println(ret.toString());
+
+        if(!msg.isEmpty())
+        {
+	        // ausgabestream fr server-logs erzeugen
+	        PrintWriter logStream=null;
+	        try {
+	            logStream=new PrintWriter(new BufferedWriter(new FileWriter(logDirectory+"server_status.log",true)));
+	        } catch (Exception e) {
+	            throw new RuntimeException(e);
+	        }
+	        logStream.println(ret.toString());
+	        logStream.close();
+        }
+    }
 
     // wird aufgerufen, wenn ein job eingegangen ist
     public void handleGV(JobContext context)
     {
         String jobname=context.getJobName();
-        System.out.println("have to handle job "+jobname+
+        
+       
+        
+        statusLog("have to handle job "+jobname+
                 " for userid/customer "+
                 context.getUserId()+"/"+context.getCustomerId());
         
@@ -280,6 +336,10 @@ public class TestServer
             handleMultiTransfer(context,!INVERSE);
         else if (jobname.equals("SammelLast"))
             handleMultiTransfer(context,INVERSE);
+        else if (jobname.equals("SEPAInfo"))
+            handleSEPAInfo(context);
+        else if (jobname.equals("UebSEPA"))
+        	handleSEPAUeb(context, "116");
         else
             throw new HBCI_Exception("'"+jobname+"' not yet supported");
     }
@@ -309,7 +369,7 @@ public class TestServer
         // alle kundenkonten durchlaufen
         for (int i=0;i<accounts.length;i++) {
             acc=accounts[i];
-            System.out.println("adding saldo for account "+acc.toString());
+            statusLog("adding saldo for account "+acc.toString());
             
             // kontosaldo in antwort einstellen (antwortdaten erzeugen)
             BigDecimal saldo=backend.getSaldo(acc);
@@ -320,7 +380,6 @@ public class TestServer
             symbols.setDecimalSeparator(',');
             valueFormat.setDecimalFormatSymbols(symbols);
             valueFormat.setDecimalSeparatorAlwaysShown(true);
-            
             
             
             context.setData(counter,"KTV.KIK.country",acc.country);
@@ -352,11 +411,11 @@ public class TestServer
             return;
         }
         
-        System.out.println("Nachricht von Kunde "+context.getCustomerId()+" (Nutzerkennung "+context.getUserId()+"):");
-        System.out.println("  Konto: "+acc);
-        System.out.println("  An: "+context.getJobData("recpt"));
-        System.out.println("  Betreff: "+context.getJobData("betreff"));
-        System.out.println("  Nachricht: "+context.getJobData("msg"));
+        statusLog("Nachricht von Kunde "+context.getCustomerId()+" (Nutzerkennung "+context.getUserId()+"):");
+        statusLog("  Konto: "+acc);
+        statusLog("  An: "+context.getJobData("recpt"));
+        statusLog("  Betreff: "+context.getJobData("betreff"));
+        statusLog("  Nachricht: "+context.getJobData("msg"));
         
         backend.storeCustomMsg(acc,
                 context.getJobData("recpt"),
@@ -379,6 +438,44 @@ public class TestServer
     private void handleUeb(JobContext context,boolean terminated)
     {
         handleUeb(context,false,"20",terminated);
+    }
+    
+    private void handleSEPAInfo(JobContext context)
+    {
+   	
+    	// abgefrages konto berprfen
+    	// evtl. für später nur bestimmte konten abfragen:
+        /*.checkKTV("My");
+        if (acc==null) {
+        	HBCIUtils.log("ACC = NULL",HBCIUtils.LOG_DEBUG);
+            //return;
+        }*/
+        
+
+        // kontosammlung fr antwortdaten zusammenstellen
+        Konto[] accounts;
+        Konto acc = null;
+        accounts=context.getAllMyAccounts();
+        
+        int counter=0;
+        // alle kundenkonten durchlaufen
+        for (int i=0;i<accounts.length;i++) {
+            acc=accounts[i];
+
+            HBCIUtils.log("adding SEPA Info for account "+acc.toString() ,HBCIUtils.LOG_DEBUG);
+
+            context.setData(counter,"ACC.sepa","J");
+            context.setData(counter,"ACC.iban",acc.iban);
+            context.setData(counter,"ACC.bic",acc.bic);
+            context.setData(counter,"ACC.number",acc.number);
+            context.setData(counter,"ACC.KIK.country",acc.country);
+            context.setData(counter,"ACC.KIK.blz",acc.blz);
+            
+            context.addStatus(null,"0020","SEPA Daten zurueckgemeldet",null);
+            counter++;
+        }
+    	
+    	
     }
     
     // eingehenden berweisungsauftrag handeln
@@ -435,10 +532,10 @@ public class TestServer
         
         if (terminated)
             System.out.print("terminated ("+HBCIUtils.date2StringISO(date)+") ");
-        System.out.println("request for "+(inverse?"debit note":"transfer"));
-        System.out.println("  my account:    "+my);
-        System.out.println("  other account: "+other);
-        System.out.println("  value: "+btg);
+        statusLog("request for "+(inverse?"debit note":"transfer"));
+        statusLog("  my account:    "+my);
+        statusLog("  other account: "+other);
+        statusLog("  value: "+btg);
         
         if (!terminated) {
             /* btg wird immer zum my-konto addiert
@@ -462,6 +559,155 @@ public class TestServer
             context.addStatus(null,"0010","Auftrag entgegengenommen",null);
         }
     }
+    
+    // eingehenden berweisungsauftrag handeln
+    private void handleSEPAUeb(JobContext context, String myKey)//,boolean inverse,String myKey,boolean terminated)
+    {
+        Konto    my=context.checkKTV("My");
+        
+        if (my==null) {
+        	context.addStatus(null, "9200", "Konto nicht gefunden.", null);
+            return;
+        }
+        
+        String   sepadescr=context.getJobData("sepadescr");
+        String   sepapain=context.getJobData("sepapain");
+        
+        PainVersion SEPAUebPain = new PainVersion(sepadescr);
+        InputStream stream;
+		try {
+			stream = new ByteArrayInputStream(sepapain.getBytes("UTF-8"));
+		} catch (UnsupportedEncodingException e) {
+			context.addStatus("sepapain","9210","UnsupportedEncodingException",null);
+			return;
+		}
+        
+        ISEPAParser myParser = SEPAParserFactory.get(SEPAUebPain);
+        
+        ArrayList<Properties> sepaResult = new ArrayList<Properties>();
+        myParser.parse(stream, sepaResult);
+        
+        if(sepaResult.size() != 1)
+        {
+        	context.addStatus(null, "3999", "Anzahl der Überweisungen ist ungültig", null);
+        	return;
+        }
+                
+        Properties aProb= sepaResult.get(0);
+        
+        for(Entry<Object, Object> key: aProb.entrySet())
+        		HBCIUtils.log("key: "+(String)key.getKey()+ " value:"+(String)key.getValue(), HBCIUtils.LOG_DEBUG);
+        
+        if(my.iban.compareToIgnoreCase(aProb.getProperty("src.iban"))!=0)
+        {
+        	HBCIUtils.log("my iban:"+my.iban+" src.iban:"+aProb.getProperty("src.iban"), HBCIUtils.LOG_DEBUG);
+        	context.addStatus(null, "9130", "IBAN passt nicht zum Konto", null);
+        	return;        	
+        }
+        
+        if(my.bic.compareToIgnoreCase(aProb.getProperty("src.bic")) != 0)
+        {
+        	HBCIUtils.log("my bic:"+my.bic+" src.iban:"+aProb.getProperty("src.bic"), HBCIUtils.LOG_DEBUG);
+        	context.addStatus(null, "9130", "BIC passt nicht zum Konto", null);
+        	return;        	
+        }
+        
+        
+        Konto    other= new Konto();
+        other.iban = aProb.getProperty("dst.iban");
+        other.bic = aProb.getProperty("dst.bic");
+        other.name = aProb.getProperty("dst.name");
+        other.country="DE";
+        
+        String   name=aProb.getProperty("dst.name");
+        
+        Value    btg=new Value(aProb.getProperty("value"),aProb.getProperty("curr"));
+        
+        String endtoend = aProb.getProperty("endtoendid", "");
+
+        String[] usage={aProb.getProperty("usage", "")};
+        
+ 
+//        context.addStatus(null,"9210","Tempfehler",null);
+        
+  //      Value    btg=context.extractBTG("BTG");
+        String   key="51";//context.getJobData("key");
+      //  String   addkey=context.getJobData("addkey");
+        //String[] usage=context.extractStringArray("usage.usage");
+        //Date     date=context.extractDate("date");
+        //String   id=context.getJobData("id");
+        
+
+        
+        /*if (!terminated && date!=null) {
+            context.addStatus("date","9150","Belegung nicht erlaubt",null);
+            return;
+        }*/
+        
+        /*if (terminated && date==null) {
+            context.addStatus("date","9160","Ausfhrungsdatum fehlt",null);
+            return;
+        }*/
+        // TODO minpretime und maxpretime testen
+        
+        /*if (id!=null) {
+            context.addStatus("id","9150","Belegung nicht erlaubt",null);
+            return;
+        }*/
+        
+        // *** hoehe von btg ueberpruefen
+        if (btg.getLongValue()<=0) {
+            context.addStatus("BTG.value","9215","Inhalt zu klein",null);
+            return;
+        }
+        
+        // waehrung von btg ueberprfen
+        if (!btg.getCurr().equals("EUR")) {
+            context.addStatus("BTG.curr","9210","Ungltige Whrung",null);
+            return;
+        }
+        
+        // *** key auf erlaubte werte berprfen
+        // *** usage auf maxanzahl ueberpruefen
+        
+        /*other.name=name;
+        other.name2=name2;
+        */
+        
+        /*if (terminated)
+            System.out.print("terminated ("+HBCIUtils.date2StringISO(date)+") ");
+        System.out.println("request for "+(inverse?"debit note":"transfer"));
+        System.out.println("  my account:    "+my);
+        System.out.println("  other account: "+other);
+        System.out.println("  value: "+btg);
+        */
+        
+        //if (!terminated) {
+            /* btg wird immer zum my-konto addiert
+             bei berweisungen muss dieser wert also negativ sein (weil das
+             eigene konto ja belastet wird), bei lastschriften (inverse=true)
+             muss der wert positiv bleiben, weil das eigene konto erhht wird */
+        
+        
+            //if (!inverse)
+        	btg.setValue(btg.getBigDecimalValue().multiply(new BigDecimal(-1)));
+            
+            backend.addSepaTransfer(my,other,btg,usage,myKey,null, endtoend);
+            
+            // hier alle konten bei dieser bank checken
+            if ((other=context.extractOtherSEPAAccount(other)).customerid!=null) {
+                btg.setValue(btg.getBigDecimalValue().multiply(new BigDecimal(-1)));
+                backend.addSepaTransfer(other,my,btg,usage,"166",null, endtoend);
+            }
+            
+            context.addStatus(null,"0020","Auftrag ausgefhrt",null);
+ //       } else {
+ //           // TODO Auftrag muss in scheduled queue aufgenommen werden
+ //           context.addStatus(null,"0010","Auftrag entgegengenommen",null);
+ //       }
+        
+    }
+    
     
     private void handleKUmsNew(JobContext context)
     {
@@ -519,7 +765,7 @@ public class TestServer
         int counter=0;
         for (int i=0;i<accounts.length;i++) {
             Konto acc=accounts[i];
-            System.out.println("adding statement of account for "+acc.toString());
+            statusLog("adding statement of account for "+acc.toString());
             
             String data=backend.getStatementOfAccount(acc,from,to,onlyNew);
             
@@ -544,7 +790,7 @@ public class TestServer
         if (startdate!=null && enddate!=null && startdate.compareTo(enddate)>0) {
             context.addStatus("enddate","9210","Endedatum liegt vor Startdatum",null);
         } else {
-            System.out.println("returning status protocol for timerange '"+
+            statusLog("returning status protocol for timerange '"+
                     ((startdate!=null)?HBCIUtils.date2StringISO(startdate):"any")+
                     "' to '"+
                     ((enddate!=null)?HBCIUtils.date2StringISO(enddate):"any")+
@@ -583,7 +829,7 @@ public class TestServer
     {
         // my-KTV checken, wenn vorhanden
         
-        System.out.println("processing mass "+(inverse?"debit":"transfer"));
+        statusLog("processing mass "+(inverse?"debit":"transfer"));
         String data=context.getJobData("data");
         
         // TODO dtaus-data auswerten
