@@ -321,9 +321,9 @@ public class XMLTools
             case 17:
                 ret="BZ-berweisung"; break;
             case 20:
-                ret="berweisung"; break;
+                ret="Ueberweisung"; break;
             case 51:
-                ret="berweisungsgutschrift"; break;
+                ret="Ueberweisungsgutschrift"; break;
             case 52:
                 ret="Dauerauftragsgutschrift"; break;
             case 53:
@@ -332,6 +332,56 @@ public class XMLTools
                 ret="BZ-Gutschrift"; break;
             case 71:
                 ret="Lastschrifteinreichung"; break;
+            case 104:
+                ret="SEPA Einzelbuchung Soll, B2B"; break;
+            case 105:
+                ret="SEPA Einzelbuchung Soll, Core"; break;
+            case 108:
+                ret="SEPA Soll, Rückbelastung, B2B"; break;
+            case 109:
+                ret="SEPA Soll, Rückbelastung, Core"; break;
+            case 116:
+                ret="SEPA Einzelbuchung Soll"; break;
+            case 119:
+                ret="SEPA Einzelbuchung Spende (Purpose: CHAR)"; break;
+            case 152:
+                ret="SEPA Einzelbuchung Dauerauftrag"; break;
+            case 153:
+                ret="SEPA Einzelbuchung Haben, Lohn, Gehalts, Rentengutschrift"; break;
+            case 154:
+                ret="SEPA Einzelbuchung Haben, Vermögenswirksame Leistungen"; break;
+            case 156:
+                ret="SEPA Einzelbuchung Haben, Überweisung öffentlicher Kassen"; break;
+            case 159:
+                ret="SEPA Retoure Haben für unanbringliche Überweisung"; break;
+            case 166:
+                ret="SEPA Einzelbuchung Haben"; break;
+            case 169:
+                ret="SEPA Einzelbuchung Spende(Purpose: CHAR)"; break;
+            case 171:
+                ret="SEPA Einzelbuchung Haben Core"; break;
+            case 174:
+                ret="SEPA Einzelbuchung Haben B2B"; break;
+            case 177:
+                ret="SEPA Online (Einzelbuchung Soll)"; break;
+            case 181:
+                ret="SEPA Haben; Wiedergutschrift, Core)"; break;
+            case 184:
+                ret="SEPA Haben, Wiedergutschrift, B2B"; break;
+            case 191:
+                ret="SEPA Sammler Soll"; break;
+            case 192:
+                ret="SEPA Sammler Haben, Core"; break;
+            case 193:
+                ret="SEPA Soll, Reversal"; break;
+            case 194:
+                ret="SEPA Sammler Haben"; break;
+            case 195:
+                ret="SEPA SammlerSoll, Core"; break;
+            case 196:
+                ret="SEPA Sammler Haben, B2B"; break;
+            case 197:
+                ret="SEPA Sammler Soll, B2B"; break;
             default:
                 ret=gvcode;
         }
