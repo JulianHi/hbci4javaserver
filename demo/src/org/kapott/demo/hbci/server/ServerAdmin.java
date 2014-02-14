@@ -34,6 +34,9 @@ public interface ServerAdmin
 	
 	public String getBIC()
 	        throws RemoteException;
+	
+	public String getPintTanURL()
+	        throws RemoteException;
     
     public boolean verify(String userid,String passwd)
         throws RemoteException;

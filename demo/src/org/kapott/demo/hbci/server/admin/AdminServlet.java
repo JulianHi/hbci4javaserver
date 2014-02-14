@@ -210,6 +210,8 @@ public class AdminServlet
             printTableLineMulti(row++,out,"Gltige Kunden-IDs",(sta=admin.getCustomerIds(userid)),"customerids");
             session.setAttribute("old_customerids",sta);
             
+            
+            
             // tabelleneintrag mit system-ids erzeugen
             sta=admin.getSysIds(userid);
             out.println("<tr bgcolor=\""+(((row++)&1)!=0?"#dddddd":"#f0f0f0")+"\">");
@@ -316,7 +318,7 @@ public class AdminServlet
             out.println("</tbody>");
             
             out.println("</table");
-            out.println("<p></p>");
+            out.println("<p><b>PinTan Url:</b>"+admin.getPintTanURL()+"</p>");
             
             out.println("<input type=\"submit\" name=\"action\" value=\"Daten neu ermitteln\">");
             out.println("<input type=\"submit\" name=\"action\" value=\"nderungen bernehmen\">");
@@ -656,6 +658,7 @@ public class AdminServlet
             // ausgabestream erzeugen
             response.setContentType("text/html");
             PrintWriter out=response.getWriter();
+            
             
             // html-kopf erzeugen
             printHeader(out,userid);

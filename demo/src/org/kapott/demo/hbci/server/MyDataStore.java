@@ -200,6 +200,11 @@ public class MyDataStore
         return new String[][] {{"2",getSingleLine("address"),null,null,null},
                                {"3",getSingleLine("pintanurl"),null,"MIM","1"}};
     }
+    
+    public String getPinTanUrl()
+    {
+    	return getSingleLine("pintanurl");
+    }
 
     // liste der zu untersttzenden Sprachen aus datei "languages" einlesen
     public String[] getSuppLangs(String hbciversion)

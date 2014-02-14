@@ -40,7 +40,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 

@@ -34,7 +34,8 @@ public class ServerAdminImpl
     extends UnicastRemoteObject
     implements ServerAdmin 
 {
-    private HBCIServer  server;
+	private static final long serialVersionUID = 3753888581060924496L;
+	private HBCIServer  server;
     private MyDataStore dataStore;
     private MyBackend   backend;
     
@@ -175,4 +176,9 @@ public class ServerAdminImpl
     {
         dataStore.setUserTANList(userid,tans);
     }
+
+	@Override
+	public String getPintTanURL() throws RemoteException {
+		return dataStore.getPinTanUrl();
+	}
 }
